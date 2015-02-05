@@ -12,7 +12,7 @@ do {
 	my $choice = makeChoice();
 
 	exit(0) if ( $choice == 0 );
-	modModifyPlymouth if ( $choice == 1 );
+	modModifyPlymouth() if ( $choice == 1 );
 
 } while( 1 == 1 );
 
@@ -85,7 +85,7 @@ sub _sysCall{
 	if ( $args->{title} ) {
 
 		_printGreen( $args->{title} . "\n", 1 );
-		
+
 	}
 
 	if ( $args->{delay} && $args->{delay} > 0 ) {
