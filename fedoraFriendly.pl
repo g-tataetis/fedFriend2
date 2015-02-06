@@ -11,12 +11,23 @@ do {
 	showModules();
 	my $choice = makeChoice();
 
-	exit(0) if ( $choice == 0 );
-	modModifyPlymouth() if ( $choice == 1 );
+	exit(0) 					if ( $choice == 0 );
+	modModifyPlymouth() 		if ( $choice == 1 );
+	modInstallYoutubeDl() 		if ( $choice == 2 );
+	modInstallRPMFusionRepo() 	if ( $choice == 3 );
+	runAll() 					if ( $choice == 666 );
 
 } while( 1 == 1 );
 
 #===SUBS===============================================================================
+
+sub runAll {
+
+	modModifyPlymouth();
+	modInstallYoutubeDl();
+	modInstallRPMFusionRepo();
+
+}
 
 sub modModifyPlymouth{
 
@@ -25,6 +36,26 @@ sub modModifyPlymouth{
 				exitFail 	=> 1 	});
 
 	_sysCall({ 	command 	=> "sudo dracut -f",
+				delay 		=> 3,
+				exitFail 	=> 1 	});
+
+}
+
+sub modInstallYoutubeDl{
+
+	_sysCall({ 	command 	=> "sudo yum install youtube-dl -y",
+				delay 		=> 3,
+				exitFail 	=> 1 	});
+
+}
+
+sub modInstallRPMFusionRepo {
+
+	_sysCall({ 	command 	=> 'sudo yum localinstall --nogpgcheck http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y',
+				delay 		=> 3,
+				exitFail 	=> 1 	});
+
+	_sysCall({ 	command 	=> 'sudo yum update -y',
 				delay 		=> 3,
 				exitFail 	=> 1 	});
 
@@ -43,6 +74,8 @@ sub showModules{
 
 	_printGreen( "\nAVAILABLE MODULES :\n\n" );
 	_printGreen( "1\tModify plymouth\n" );
+	_printGreen( "2\tInstall Youtube downloader, youtube-dl\n" );
+	_printGreen( "3\tInstall RPMFusion repos\n" );
 	_printGreen( "0\tExit\n" );
 	_printGreen( "\n" );
 
@@ -52,6 +85,16 @@ sub _printGreen{
 	my $string = shift;
 	my $wait = shift || 0;
 	print color 'bold green';
+	print $string;
+	print color 'reset';
+	sleep($wait);
+	return 1;
+}
+
+sub _printYellow{
+	my $string = shift;
+	my $wait = shift || 0;
+	print color 'bold yellow';
 	print $string;
 	print color 'reset';
 	sleep($wait);
@@ -89,15 +132,13 @@ sub _sysCall{
 	}
 
 	if ( $args->{delay} && $args->{delay} > 0 ) {
-		print color 'bold green';
-		print "About to execute:\n";
-		print color 'bold yellow';
-		print "\t" . $args->{command} . "\n";
-		print color 'reset';
-		sleep ( $args->{delay} );
+
+		_printGreen( "About to execute:\n" );
+		_printYellow( "\t" . $args->{command} . "\n", $args->{delay} );
+
 	}
 
-	my $outcome = system($args->{command});
+	my $outcome = system( $args->{command} );
 
 	if ( $outcome == 0 ) {
 		return 1;
